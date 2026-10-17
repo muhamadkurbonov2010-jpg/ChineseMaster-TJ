@@ -1,3 +1,4 @@
+'use client'
 import React, { useRef, useEffect } from 'react'
 
 // Simple canvas to capture pointer strokes. Data format: array of strokes, each stroke is array of points {x,y,t}
@@ -12,6 +13,7 @@ export default function WritingCanvas({ onFinish }: { onFinish?: (data: any) => 
     const ctx = canvas.getContext('2d')!
     canvas.width = 300
     canvas.height = 300
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.lineWidth = 6
     ctx.lineCap = 'round'
     ctx.strokeStyle = '#111'
@@ -45,8 +47,15 @@ export default function WritingCanvas({ onFinish }: { onFinish?: (data: any) => 
   }
   function handlePointerUp(e: any) {
     isDrawing.current = false
-    strokes.current.push(currentStroke.current.slice())
+    if (currentStroke.current.length > 0) strokes.current.push(currentStroke.current.slice())
     currentStroke.current = []
+  }
+
+  function clear() {
+    const canvas = canvasRef.current!
+    const ctx = canvas.getContext('2d')!
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    strokes.current = []
   }
 
   function finish() {
@@ -63,9 +72,9 @@ export default function WritingCanvas({ onFinish }: { onFinish?: (data: any) => 
         onPointerMove={(e) => handlePointerMove(e.nativeEvent)}
         onPointerUp={(e) => handlePointerUp(e.nativeEvent)}
       />
-      <div className="mt-2">
-        <button className="mr-2 px-3 py-1 bg-blue-600 text-white rounded" onClick={finish}>Submit</button>
-        <button className="px-3 py-1 border rounded" onClick={() => location.reload()}>Clear</button>
+      <div className="mt-2 flex gap-2">
+        <button className="px-3 py-1 bg-blue-600 text-white rounded" onClick={finish}>Submit</button>
+        <button className="px-3 py-1 border rounded" onClick={clear}>Clear</button>
       </div>
     </div>
   )
